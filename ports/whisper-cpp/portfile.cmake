@@ -1,10 +1,20 @@
 
+# TEMPORARY (QVAC-18991 validation): pin to Zbig9000 fork's PR #25 HEAD
+# (https://github.com/tetherto/qvac-ext-lib-whisper.cpp/pull/25) so the
+# transcription-whispercpp CI can validate the upstream-sync content
+# (whisper.cpp v1.8.4.3 + tetherto/master post-divergence merge + VAD
+# streaming regression test) on its own, in isolation from QVAC-18300 /
+# 18992 / 18993.
+#
+# After PR #25 merges and a v1.8.4.3 tag is published, REF flips to
+# `v${VERSION}` against `tetherto/qvac-ext-lib-whisper.cpp` (no SHA512
+# recompute needed if the tag matches PR #25's HEAD).
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
-  REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF v${VERSION}
-  SHA512 8d265bf6c0dd6e82fbc05d3b083ac0c721df4d75cb536d170eee3a4d810fdc421f79f383682fa6912aa8551a5115c4240105e00070855193df7ec41e4f6a4d83
-  HEAD_REF master
+  REPO Zbig9000/qvac-ext-lib-whisper.cpp
+  REF 47784b9e00dcf1068f334bb30a4b8e89f8875f52
+  SHA512 88fcfe1920a5530d3b5b2156e0ba2bf772d5abb1ba138654d724d09c8bcb79f166b050e763f0f1ff839930baf2f6c00f6ae6e715f5a046d529debb0558b3d020
+  HEAD_REF QVAC-18991-pull-latest-whisper-cpp-upstream
 )
 
 if (VCPKG_TARGET_IS_ANDROID)
