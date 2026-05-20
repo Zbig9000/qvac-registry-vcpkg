@@ -1,10 +1,30 @@
 
+# TEMPORARY: pinning the Zbig9000 fork's QVAC-18993 branch instead of
+# tetherto so the bundled-ggml Android-dynamic-backend commits
+# (eb63b2b7, 3683de4b) and the chatterbox <atomic> fix (14620c88) are
+# available before the upstream PRs (whisper-cpp PR #25 = QVAC-18991
+# and PR #26 = QVAC-18993) land on tetherto/master and a v1.8.4.3 tag
+# is published.
+#
+# After both PRs merge + the tag exists:
+#   - flip REPO to tetherto/qvac-ext-lib-whisper.cpp
+#   - REF to v1.8.4.3 (or the tagged merge commit SHA)
+#   - recompute SHA512
+#
+# The QVAC-18993 branch is rebased on top of QVAC-18991 so it carries
+# everything QVAC-18991 ships plus 3 extra commits:
+#   eb63b2b7  ggml : allow GGML_BACKEND_DL with a static core
+#   3683de4b  ggml-backend : android per-arch CPU variant dlopen fallback
+#   14620c88  tts-cpp : add missing <atomic> include in chatterbox_tts.cpp
+# All three were previously carried in this port as patches[0-1]
+# (now removed) or as deferred fix (chatterbox); they're now upstreamed
+# into the whisper.cpp fork so the port stays patch-free.
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
-  REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF v${VERSION}
-  SHA512 8d265bf6c0dd6e82fbc05d3b083ac0c721df4d75cb536d170eee3a4d810fdc421f79f383682fa6912aa8551a5115c4240105e00070855193df7ec41e4f6a4d83
-  HEAD_REF master
+  REPO Zbig9000/qvac-ext-lib-whisper.cpp
+  REF 14620c8857fc289313a3b0a82c9ce69accaa046d
+  SHA512 733effd6f77de859bd9f1cf1b6dfe49283b21589f60887a90b9e7bcbd9bc0f3f7f572c964c52a2c20934a8702a726ed3d9ff1900a04da90c77fadfd37bf08931
+  HEAD_REF QVAC-18993-bundled-ggml-android-dynamic-backend
 )
 
 if (VCPKG_TARGET_IS_ANDROID)
@@ -53,6 +73,56 @@ else()
   list(APPEND PLATFORM_OPTIONS -DGGML_VULKAN=OFF)
 endif()
 
+# Android: ship the same dynamic-backend + CPU-variant recipe llama-cpp
+# already uses on this triplet. GGML_BACKEND_DL=ON makes ggml load the
+# backend implementations as separate .so files at runtime (one per
+# backend, picked by the device caps), so a single APK ships all the
+# variants and the consumer's binary only statically links the dispatcher.
+# GGML_CPU_ALL_VARIANTS + GGML_CPU_REPACK gives one tuned CPU .so per
+# microarch (armv8.0/armv8.2-fp16/armv8.2-fp16+dotprod/armv8.7-i8mm), and
+# COOPMAT[2] are disabled because the Vulkan validation layer's coopmat
+# extensions are unstable on Adreno NDK headers.
+# OpenCL is gated behind the `opencl` feature so non-Adreno Android
+# consumers don't pull in an unused backend.
+# Android dynamic-backend mode: per-microarch CPU + GPU backends ship as
+# MODULE .so files dlopen'd at runtime, while the dispatcher
+# (libwhisper.a, libggml.a, libggml-base.a) stays static — same shape
+# as the speech-stack uses for parakeet-cpp/tts-cpp.
+#
+# The bundled ggml in this port's REF pin carries two commits from
+# QVAC-18993 that make the combo above work end-to-end on Android:
+#   eb63b2b7  ggml : allow GGML_BACKEND_DL with a static core
+#             (removes the FATAL_ERROR + flips PIC/GGML_BUILD on)
+#   3683de4b  ggml-backend : android per-arch CPU variant dlopen fallback
+#             (lets ggml_backend_load_best resolve libggml-cpu-android_armv*_*.so
+#              via Android's in-APK linker when there's no on-disk lib dir)
+# Both will land on tetherto/master via whisper-cpp PR #26 (QVAC-18993);
+# after that ships + a v1.8.4.3 tag is published, the port can re-point
+# to tetherto + drop the temporary Zbig9000 pin above.
+if(VCPKG_TARGET_IS_ANDROID)
+  set(DL_BACKENDS ON)
+  list(APPEND PLATFORM_OPTIONS
+    -DGGML_BACKEND_DL=ON
+    -DGGML_CPU_ALL_VARIANTS=ON
+    -DGGML_CPU_REPACK=ON
+    -DGGML_VULKAN_DISABLE_COOPMAT=ON
+    -DGGML_VULKAN_DISABLE_COOPMAT2=ON)
+  if("opencl" IN_LIST FEATURES)
+    list(APPEND PLATFORM_OPTIONS -DGGML_OPENCL=ON)
+  endif()
+else()
+  set(DL_BACKENDS OFF)
+endif()
+
+# Same spirv-headers include-shim as in the ggml-speech port: upstream
+# ggml v0.10.2 uses spv::* enums unconditionally in ggml-vulkan.cpp, and
+# ggml-vulkan's CMakeLists.txt does not call find_package(SpirvHeaders)
+# so the vcpkg-installed include prefix isn't visible to it by default.
+set(SPIRV_HEADERS_CFLAGS "")
+if("vulkan" IN_LIST FEATURES)
+  set(SPIRV_HEADERS_CFLAGS "-DCMAKE_CXX_FLAGS=-isystem ${CURRENT_INSTALLED_DIR}/include")
+endif()
+
 vcpkg_cmake_configure(
   SOURCE_PATH "${SOURCE_PATH}"
   DISABLE_PARALLEL_CONFIGURE
@@ -66,6 +136,7 @@ vcpkg_cmake_configure(
     -DBUILD_SHARED_LIBS=OFF
     -DGGML_BUILD_NUMBER=1
     ${PLATFORM_OPTIONS}
+    ${SPIRV_HEADERS_CFLAGS}
 )
 
 vcpkg_cmake_install()
@@ -82,7 +153,11 @@ vcpkg_copy_pdbs()
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
-if (VCPKG_LIBRARY_LINKAGE MATCHES "static")
+if (NOT DL_BACKENDS AND VCPKG_LIBRARY_LINKAGE MATCHES "static")
+  # On dynamic-backend Android the ggml backend .so files live in bin/
+  # alongside the static dispatcher; wiping bin/ here would silently
+  # ship a runtime that loads no backends. Only wipe for true
+  # static-only triplets.
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin")
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
