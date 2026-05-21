@@ -118,9 +118,16 @@ endif()
 # ggml v0.10.2 uses spv::* enums unconditionally in ggml-vulkan.cpp, and
 # ggml-vulkan's CMakeLists.txt does not call find_package(SpirvHeaders)
 # so the vcpkg-installed include prefix isn't visible to it by default.
+# MSVC's cl.exe does not understand `-isystem` (it treats the flag as a
+# positional source file argument and tries to compile the include path),
+# so use `/I` there and the GCC/Clang `-isystem` form elsewhere.
 set(SPIRV_HEADERS_CFLAGS "")
 if("vulkan" IN_LIST FEATURES)
-  set(SPIRV_HEADERS_CFLAGS "-DCMAKE_CXX_FLAGS=-isystem ${CURRENT_INSTALLED_DIR}/include")
+  if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
+    set(SPIRV_HEADERS_CFLAGS "-DCMAKE_CXX_FLAGS=/I${CURRENT_INSTALLED_DIR}/include")
+  else()
+    set(SPIRV_HEADERS_CFLAGS "-DCMAKE_CXX_FLAGS=-isystem ${CURRENT_INSTALLED_DIR}/include")
+  endif()
 endif()
 
 vcpkg_cmake_configure(
