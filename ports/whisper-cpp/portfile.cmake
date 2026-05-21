@@ -1,22 +1,3 @@
-
-# REF = tetherto/qvac-ext-lib-whisper.cpp@f3102199 (master), the merge
-# commit for whisper-cpp PR #28 (QVAC-18993: bundled-ggml --- Android
-# dynamic backend + per-arch CPU dlopen fallback). This is the third
-# and final merge in the Group-1/2 chain:
-#   PR #25 (QVAC-18991, upstream whisper.cpp sync) --- merged 2026-05-20
-#   PR #27 (QVAC-18966, tts-cpp chatterbox <atomic> include) --- merged 2026-05-20
-#   PR #28 (QVAC-18993, ggml-backend Android dynamic backend) --- merged 2026-05-21
-# So `tetherto/master` now carries every commit this port previously
-# pinned from `Zbig9000/qvac-ext-lib-whisper.cpp@14620c8857`. Diffed
-# the two source trees (excluding the unrelated `parakeet-cpp/` and
-# `tts-cpp/` subdirs which are separate vcpkg ports): byte-identical.
-# Therefore this port-version bump is REF-only --- no source change,
-# no patch additions, no CMake recipe changes.
-#
-# Port stays patch-free. Next port-version bump under QVAC-19071 will
-# either pick up a tagged whisper.cpp release (v1.8.4.x) once the
-# tetherto fork tags one, or roll forward to a newer `tetherto/master`
-# commit when the QVAC-18992 ggml-speech migration lands.
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
