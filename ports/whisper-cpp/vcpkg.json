@@ -1,7 +1,7 @@
 {
   "name": "whisper-cpp",
   "version": "1.8.4.3",
-  "port-version": 0,
+  "port-version": 1,
   "description": "High-performance inference of OpenAI's Whisper automatic speech recognition (ASR) model",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
@@ -16,8 +16,13 @@
     }
   ],
   "features": {
+    "metal": {
+      "description": "Enable Metal GPU acceleration (Apple-only; targets macOS and iOS via the ggml-metal backend). No extra package dependencies — Metal.framework is provided by the platform SDK.",
+      "supports": "osx | ios"
+    },
     "opencl": {
       "description": "Enable OpenCL GPU acceleration (Android-only; targets Adreno via the ggml-opencl backend).",
+      "supports": "android",
       "dependencies": [
         {
           "name": "opencl",
@@ -26,7 +31,8 @@
       ]
     },
     "vulkan": {
-      "description": "Enable Vulkan GPU acceleration",
+      "description": "Enable Vulkan GPU acceleration (Linux/Windows/Android; macOS/iOS use the metal feature instead).",
+      "supports": "!osx & !ios",
       "dependencies": [
         {
           "name": "spirv-headers",

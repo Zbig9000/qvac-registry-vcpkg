@@ -35,17 +35,28 @@ endif()
 
 set(PLATFORM_OPTIONS)
 
-if (VCPKG_TARGET_IS_OSX)
-  list(APPEND PLATFORM_OPTIONS -DGGML_METAL=ON)
-elseif (VCPKG_TARGET_IS_IOS)
-  # Intentionally NOT -DGGML_METAL=ON. iOS bare-kit builds were hitting
-  # a separate Metal/Compiler XPC crash during transcribe() on physical
-  # iPhone (XPC_ERROR_CONNECTION_INTERRUPTED / MTLCompiler peer-unloaded)
-  # that is being investigated independently of the OutputCallBackJs
-  # teardown UAF. Force the flag OFF so it overrides any upstream default
-  # and stays explicit in the build log; iOS falls back to the CPU
-  # backend until the Metal-side issue is fixed.
-  list(APPEND PLATFORM_OPTIONS -DGGML_METAL=OFF)
+# GPU backend selection is driven entirely by features now (matches the
+# llama-cpp and ggml-speech ports): the consumer selects whisper-cpp[metal]
+# / [vulkan] / [opencl] in its manifest and the corresponding GGML_*
+# CMake option is enabled here. Apple platforms can only carry `metal`
+# (gated by `"supports": "osx | ios"` in vcpkg.json), so the Vulkan
+# branch never runs on osx/ios.
+#
+# Note (iOS Metal runtime caveat): historical iOS bare-kit runs on
+# physical iPhone hit a Metal/MTLCompiler XPC crash during transcribe()
+# (XPC_ERROR_CONNECTION_INTERRUPTED / "MTLCompiler peer-unloaded"). The
+# original workaround was to force -DGGML_METAL=OFF in this portfile.
+# That hard override is removed here so the `metal` feature is the
+# single source of truth; consumers that need to opt out can simply
+# omit `[metal]` from their iOS dep entry in vcpkg.json. The runtime
+# XPC issue is tracked separately and validated end-to-end by the
+# transcription-whispercpp iOS device-farm integration tests.
+if (VCPKG_TARGET_IS_OSX OR VCPKG_TARGET_IS_IOS)
+  if("metal" IN_LIST FEATURES)
+    list(APPEND PLATFORM_OPTIONS -DGGML_METAL=ON)
+  else()
+    list(APPEND PLATFORM_OPTIONS -DGGML_METAL=OFF)
+  endif()
 elseif("vulkan" IN_LIST FEATURES)
   list(APPEND PLATFORM_OPTIONS -DGGML_VULKAN=ON)
 else()
