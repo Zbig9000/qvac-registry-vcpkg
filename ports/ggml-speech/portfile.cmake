@@ -1,22 +1,25 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech, including the iOS Metal
-# NULL-safety hardening from
-# https://github.com/tetherto/qvac-ext-ggml/pull/10 (PR-10's 3 commits
-# f21ff9a0 + b7dc01c7 + 0f54d9f7) now merged into the speech branch
-# as PR-10 merge 08d39f0c (`Merge pull request #10 from
-# ishanvohra2/fix/metal-ios-null-propagation`).
+# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD c9126afc, the merge
+# commit of PR #13 ("QVAC-18992: merge ggml-org @ 19eac6f0 (v0.10.2)
+# into speech"). The merge brings in:
 #
-# The Android backend stack still uses the GGML_CPU_ALL_VARIANTS=ON
-# + GGML_CPU_REPACK=ON shape introduced in port-version 3 (per-arch
-# CPU dlopen variants on top of the Vulkan / OpenCL MODULE .so files);
-# only the Apple Metal path changes versus port-version 3, courtesy
-# of PR-10's NULL-safety hardening on `ggml_metal_device_init` /
-# `ggml_metal_buffer_init` etc.
+#   c9126afc  Merge pull request #13 from Zbig9000/QVAC-18992-merge-ggml-from-whisper-cpp
+#   e31785e4  fix(metal): restore lost 'typedef struct {' before
+#             ggml_metal_kargs_supertonic_depthwise_1d (the ggml-org
+#             v0.10.2 sync in 166c4e12 dropped the typedef header;
+#             caught by qvac CI Apple prebuild matrix via an overlay
+#             on tetherto/qvac#2270)
+#   d39c0d29  metal: stride-aware src indexing in kernel_pad_f32 /
+#             kernel_pad_reflect_1d_f32 (fixes Mac M2 PAD test failure)
+#   166c4e12  Merge ggml-org @ 19eac6f0 into speech (sync to v0.10.2)
+#
+# The Android CPU dlopen fallback (GustavoA1604 #11) carried over from
+# port-version 4 (08d39f0c) is unchanged.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 08d39f0c
-    SHA512 0e681f60ba0ad49b1cebda914ee065c0b29f301617970b968054089830029153f1be28012dfe2ced9c1014fe8605647ca68208544e9564b5d5f1c68dfd1e82e9
+    REF c9126afc96145cc93892029b953f7de5abc09728
+    SHA512 e24b4bfb48a2be01d4703badee0aecb8772c5e35e76348e9de2ea693288bd23d84d1fb7c626dd63736f76bfcc442433522621998977661cf602ec90289f596a0
     HEAD_REF speech
 )
 
@@ -102,6 +105,20 @@ if(VCPKG_TARGET_IS_ANDROID)
         -DGGML_CPU_REPACK=ON
         -DGGML_VULKAN_DISABLE_COOPMAT=ON
         -DGGML_VULKAN_DISABLE_COOPMAT2=ON
+    )
+endif()
+
+# PR #13 (v0.10.2 sync) introduces an unconditional
+# `#include <spirv/unified1/spirv.hpp>` in src/ggml-vulkan/ggml-vulkan.cpp,
+# but the upstream ggml-vulkan CMakeLists.txt never finds spirv-headers nor
+# wires its include dir into the ggml-vulkan target. Apply a small patch
+# so it does (and depend on spirv-headers in vcpkg.json's vulkan feature).
+# TODO: push the equivalent fix upstream and drop this patch.
+if("vulkan" IN_LIST FEATURES)
+    vcpkg_apply_patches(
+        SOURCE_PATH "${SOURCE_PATH}"
+        PATCHES
+            "${CMAKE_CURRENT_LIST_DIR}/patches/0001-ggml-vulkan-find-spirv-headers.patch"
     )
 endif()
 
