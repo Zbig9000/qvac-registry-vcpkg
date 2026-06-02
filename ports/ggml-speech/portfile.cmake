@@ -1,25 +1,24 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD c9126afc, the merge
-# commit of PR #13 ("QVAC-18992: merge ggml-org @ 19eac6f0 (v0.10.2)
-# into speech"). The merge brings in:
+# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 9bca9b3d, the merge
+# commit of PR #18 ("ggml-backend-reg: Adreno-aware OpenCL backend
+# selection on Android", QVAC-18993). On top of the previous pin
+# (c9126afc, PR #13's v0.10.2 sync) it adds, on Android only:
 #
-#   c9126afc  Merge pull request #13 from Zbig9000/QVAC-18992-merge-ggml-from-whisper-cpp
-#   e31785e4  fix(metal): restore lost 'typedef struct {' before
-#             ggml_metal_kargs_supertonic_depthwise_1d (the ggml-org
-#             v0.10.2 sync in 166c4e12 dropped the typedef header;
-#             caught by qvac CI Apple prebuild matrix via an overlay
-#             on tetherto/qvac#2270)
-#   d39c0d29  metal: stride-aware src indexing in kernel_pad_f32 /
-#             kernel_pad_reflect_1d_f32 (fixes Mac M2 PAD test failure)
-#   166c4e12  Merge ggml-org @ 19eac6f0 into speech (sync to v0.10.2)
+#   9bca9b3d  Merge pull request #18 (Adreno OpenCL backend selection)
+#             ggml_backend_load_all_from_path() now uses the loaded
+#             Vulkan backend to detect the GPU and only keeps OpenCL for
+#             Adreno > 700; Adreno 1..700 -> CPU only (unload Vulkan);
+#             non-Adreno -> Vulkan/CPU (no OpenCL). Avoids the Adreno
+#             Vulkan compute SIGSEGV (vkCmdBindPipeline) seen on Samsung
+#             S25. Off Android the loader is byte-identical to before.
 #
-# The Android CPU dlopen fallback (GustavoA1604 #11) carried over from
-# port-version 4 (08d39f0c) is unchanged.
+# The PR #13 Metal/PAD fixes and the Android CPU dlopen fallback
+# (GustavoA1604 #11) are unchanged.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF c9126afc96145cc93892029b953f7de5abc09728
-    SHA512 e24b4bfb48a2be01d4703badee0aecb8772c5e35e76348e9de2ea693288bd23d84d1fb7c626dd63736f76bfcc442433522621998977661cf602ec90289f596a0
+    REF 9bca9b3d5cecc3329a61819f3c5d981bfefef5fb
+    SHA512 7355fab33e786714878c17866d939247360c4618d07822e45de977496f260bb99f377f7b4ce3c0ffc4595be8bb8efc3690a9feff0a067063a3599f802c9a0da8
     HEAD_REF speech
 )
 
