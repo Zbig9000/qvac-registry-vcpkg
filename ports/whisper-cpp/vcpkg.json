@@ -1,7 +1,7 @@
 {
   "name": "whisper-cpp",
   "version": "1.8.5",
-  "port-version": 0,
+  "port-version": 1,
   "description": "High-performance inference of OpenAI's Whisper automatic speech recognition (ASR) model",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
@@ -9,7 +9,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-05-27"
+      "version>=": "2026-06-02"
     },
     {
       "name": "vcpkg-cmake",
@@ -28,7 +28,9 @@
         {
           "name": "ggml-speech",
           "default-features": false,
-          "features": [ "metal" ],
+          "features": [
+            "metal"
+          ],
           "platform": "osx | ios"
         }
       ]
@@ -40,7 +42,9 @@
         {
           "name": "ggml-speech",
           "default-features": false,
-          "features": [ "opencl" ],
+          "features": [
+            "opencl"
+          ],
           "platform": "android"
         }
       ]
@@ -52,7 +56,9 @@
         {
           "name": "ggml-speech",
           "default-features": false,
-          "features": [ "vulkan" ],
+          "features": [
+            "vulkan"
+          ],
           "platform": "!osx & !ios"
         }
       ]
