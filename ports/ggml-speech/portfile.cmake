@@ -1,27 +1,13 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 1189e4ce, the merge
-# commit of PR #19. On top of the previous pin (9bca9b3d, PR #18's
-# Adreno-aware OpenCL backend selection on Android) it adds, for the
-# Android/Adreno OpenCL backend:
-#
-#   PR #17  Adreno elementwise OpenCL kernels (sin/cos/abs/elu/
-#           leaky_relu) so Chatterbox S3Gen's activation ops run on the
-#           Adreno OpenCL backend instead of falling back to CPU.
-#   PR #19  Gate the Adreno mul_mat fast path on weight divisibility and
-#           expose the device version, and parse the Adreno generation
-#           from the combined OpenCL device description (regex) for
-#           robust Adreno-tier detection (fixes a GGML_ASSERT crash on
-#           odd vocab / head dimensions).
-#
-# The PR #18 Adreno backend-selection behaviour, the PR #13 v0.10.2 sync
-# + Metal/PAD fixes, and the Android CPU dlopen fallback (GustavoA1604
-# #11) are unchanged. Off the Android OpenCL path the library is
-# byte-identical to before.
+# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD bec032cd (merge of PR #14,
+# QVAC-19213 Adreno-Vulkan shared-memory fix). Bumps the speech-stack ggml pin
+# to the current speech-branch tip on top of the previous pin (1189e4ce, PR #19
+# Adreno mul_mat gating + Adreno-generation regex parse).
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 1189e4ce904e83b05d3a291428224acc9d1ef473
-    SHA512 18d54db547a5622791ad19e55ed888c89c7d14cd851cfbfc9a74eae24c51dee5d45e99ea0ef30addbdf932a016b3a80d46b35890b686eb65f493d1df118d6fbd
+    REF bec032cd2d1235591b6a60d1efd809385b152292
+    SHA512 381bcfa9095fc10034ff31a6fb6a4d373f297d261237e2fd273add60c3db32ce5ac235afef3c4e17e10932f8c95eee7c4df5550b301c781e53ee69638b930518
     HEAD_REF speech
 )
 

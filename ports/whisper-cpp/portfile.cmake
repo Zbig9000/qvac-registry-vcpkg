@@ -1,17 +1,13 @@
 # whisper-cpp: pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD
-# 128dae42 (post-PR-#31 supertonic_optimizations merge). The whisper-root
-# tree is unchanged since the previous pin (a34cb6da, PR #34 KV-cache
-# CPU-buffer fallback); we move this port together with parakeet-cpp and
-# tts-cpp so all three registry ports source the same master commit and
-# the same archive SHA512. PR #31 only touches the tts-cpp/ tree (and the
-# tts-cpp port re-bumps for it), which this port does not build
-# (WHISPER_USE_SYSTEM_GGML=ON links the ggml-speech-installed ggml instead).
+# 1c75d6e9 (QVAC-19253 Supertonic + Chatterbox on Adreno-Vulkan, PR #41). We
+# move this port together with parakeet-cpp and tts-cpp so all three registry
+# ports source the same master commit and the same archive SHA512.
 #
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF 128dae4284fae3636ef5b6272ef123401d67eab7
-  SHA512 195bfcfc74c36149fa5827f5c500c8144411b7a5709601f238773782bb5aa5c81599867f0c6f915f63e3b2c11557231d04bf2df208b5d3228e973af41e38df89
+  REF 1c75d6e9d5f07a50d6b0e8b6cff48444df4594b3
+  SHA512 bd74d7831f3fdaad9bc5e366662e8c49a847db3ed7f66c4a8a94c10f1f7eee7c8fea58f91f1c8bc43da3ef64e1a4510aef6e376b5c7242711e256e14701f9e07
   HEAD_REF master
   PATCHES
     patches/0001-move-gnuinstalldirs-before-add-subdirectory-src.patch
