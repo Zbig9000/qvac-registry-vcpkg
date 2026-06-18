@@ -2,15 +2,24 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 24eeb028
-# (QVAC-19305 Supertonic v3 support, PR #42), layered on top of the previous
-# 1c75d6e9 pin (QVAC-19253 Supertonic + Chatterbox on Adreno-Vulkan, PR #41).
-# Adds Supertonic v3: 31 languages, 8-head text cross-attention, stable name
-# aliases + bridge for the renumbered v3 ONNX node ids, v1/v2 GGUF backward-
-# compat, and a convert-time bridge assertion. Lands the v3 numerical-parity
-# fixes (ConvNeXt dilations + classifier-free guidance) and the Supertonic-
-# aware quantization that makes q4_0/q8_0 GGUFs build and run (pwconv squeeze/
-# expand surgery + Q4_0 dequant-at-load).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD b95ad447, layered on
+# top of the previous 24eeb028 pin (QVAC-19305 Supertonic v3, PR #42). Brings
+# the two TTS-relevant master merges since:
+#   - QVAC-20616 [TTS GGML] end-of-speech robustness (PR #53): alignment-based
+#     EOS stop (ports the AlignmentStreamAnalyzer cross-attention signal via an
+#     in-graph attention probe) plus a heuristic stop controller (EOS
+#     confidence, n-gram repetition, text-length budget) and per-language
+#     calibration, so the Chatterbox multilingual model stops at end-of-
+#     utterance instead of rambling for ~20s of random tokens past the text.
+#   - QVAC-20557 Supertonic Android GPU (PR #54): Adreno OpenCL + Xclipse/Mali
+#     Vulkan. This also reroutes Supertonic's direct CPU-backend calls that are
+#     unlinkable under GGML_BACKEND_DL=ON --
+#     ggml_get_type_traits_cpu()->from_float -> ggml_quantize_chunk()
+#     (ggml-base, always linked) and ggml_backend_is_cpu() ->
+#     tts_cpp::detail::backend_is_cpu() (registry shim) -- so the tts-ggml
+#     addon dlopen's cleanly on Android. It is the upstream successor to the
+#     f7d4d6c fix that the tts-ggml package-local overlay was carrying; with
+#     this pin published, that overlay can be dropped.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -18,8 +27,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 24eeb0281d672416249d22ce1fb5c7ba69c92e21
-    SHA512 c66cd54900d6c3536adee0f4e92726c432d42f01b1f8a949bb1dfd9002eca4347d0de4e59609b7f5522fe3bb7b7cae5e42bc6c06279e43c125808e9bdf7d523d
+    REF b95ad4472dcd414ea88597e562d37efd53227ebc
+    SHA512 81fefc90352c9f69bcd82c84aeb0d2333e21496796cc6288907dda21fbc20ac0e42225f686c857c5abadf3067bf7fb6eac750ba31a48df731486fce92dbaa1dd
     HEAD_REF master
 )
 
