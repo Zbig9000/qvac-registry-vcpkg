@@ -1,16 +1,13 @@
 # ggml vcpkg overlay port
 #
 # Builds the ggml tensor library from tetherto/qvac-ext-ggml.
-# Fork of ggml-org/ggml (commit a8db410a) with all overlay patches
-# pre-applied, plus the merged Metal Flux RoPE and direct conv2d kernels.
+# Fork of leejet/ggml (v0.12.0) carrying the reviewed Metal/video kernels
+# (IM2COL_3D, PAD, fused Flux RoPE, direct conv2d) plus the merged LTX compute
+# set, pinned from the 2026-06-06 branch (see the REF block below for specifics).
 #
-# Pinned to 3409834f -- the merge commit of tetherto/qvac-ext-ggml#9,
-# which adds the fused Flux RoPE op, direct Metal conv2d path, and the
-# backend test/support fixes reviewed in the PR.
-#
-# Without these the Metal backend aborts mid-Wan inference with
-# `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test
-# matrix advertises invalid IM2COL_3D combos that hit CPU GGML_ASSERTs.
+# Without these kernels the Metal backend aborts mid-video inference with
+# `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test matrix
+# advertises invalid IM2COL_3D combos that hit CPU GGML_ASSERTs.
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
@@ -23,12 +20,24 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
+# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-06-06
+# (REF pinned to that branch's tip commit for reproducibility).
+#
+# ae42bd74 is the tip of 2026-06-06 — the merge of #31 (2026-06-06-deps) into the
+# canonical 2026-06-06 line. #31 wires spirv-headers into the ggml-vulkan target
+# (find_package(SPIRV-Headers) + link the imported target) so the Vulkan backend
+# finds <spirv/unified1/spirv.hpp>; this replaces the package-local overlay patch.
+# On top of leejet/ggml v0.12.0 it carries the full merged compute set: the
+# reviewed Metal/video kernels (IM2COL_3D/PAD, fused Flux RoPE, direct conv2d),
+# the coopmat1 flash-attn f32-accumulation fixes, the ggml_graph_leaf/leafs/
+# n_leafs public API export, and the ggml_conv_1d/dw im2col-type fix (derive from
+# a->type like conv_2d) so F32 conv weights (e.g. LTX audio VAE) flow through the
+# F32 path instead of aborting on the CPU im2col_f16 F16 assert.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 3409834fcc3ab549bb957682dfef7045bc58f723
-    SHA512 ebbdfdcd1e6732ab37a4caa3f170ca56c2dee766524bbd4169b615337976422a4b78fceb2dbf43bec0f98e025aad54c54ad1940267e16c2808c4a90b90350487
-    HEAD_REF 2026-01-30
+    REF ae42bd744155ce386a8f25e1972e43bc0cb5d773
+    SHA512 c488df7b1df38c640050e13eff2d5155b1f3e03411b06b75f6ff142f3a7b82bf0cd1cd83d9e487d39ca842b8f7b46de734d45b5e6c7bf9832637eee6737c1fe8
 )
 
 # --- GPU feature flags ---

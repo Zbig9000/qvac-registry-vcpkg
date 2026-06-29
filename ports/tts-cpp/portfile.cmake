@@ -2,20 +2,6 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# QVAC-16579 [TTS GGML] LavaSR neural speech enhancement
-# (qvac-ext-lib-whisper.cpp PR #68): adds an opt-in CPU/GGML post-process that
-# bandwidth-extends synthesized PCM to 48 kHz via the LavaSR Vocos enhancer
-# (ConvNeXt backbone + ISTFT spec head), converted to a single GGUF. New public
-# API tts_cpp::lavasr::Enhancer (include/tts-cpp/lavasr/enhancer.h), DSP core
-# (resampler / STFT-ISTFT / Slaney mel / FastLR merge), GGUF loader (f32 + f16),
-# and onnxruntime-parity tests. The denoiser stage is a planned follow-up.
-# Backward compatible: no enhancer config => byte-identical to the prior pin.
-#
-# !!! INTERIM PIN !!!  PR #68 is not yet merged, so this points at the fork
-# commit Zbig9000/qvac-ext-lib-whisper.cpp@167c9406. Before merging this
-# registry PR, flip REPO back to tetherto/qvac-ext-lib-whisper.cpp and REF to
-# the merged master commit, then re-run `vcpkg x-add-version tts-cpp`.
-#
 # QVAC-19557 [TTS GGML] S3TokenizerV2 host-mirror elimination
 # (qvac-ext-lib-whisper.cpp PR #65): the voice-conditioning bake loaded the
 # S3TokenizerV2 encoder weights (~458 MB F32) into a host std::vector mirror AND
@@ -26,8 +12,12 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 46921668 (PR #65
-# merged).  Layered on the previous 1cc2d383 pin (QVAC-21118 PR #62: chunk-
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 586268bf (PR #67
+# merged: QVAC-20557 run Chatterbox correctly on ARM Mali Vulkan via an
+# is_arm_mali-gated unfused CFM attention -- zero change off ARM Mali, CPU
+# output byte-identical).  Layered on the 46921668 pin (PR #65 merged,
+# QVAC-19557 S3TokenizerV2 host-mirror elimination, described above), the
+# 1cc2d383 pin (QVAC-21118 PR #62: chunk-
 # streaming CFM-step floor for the Multilingual standard 10-step CFM) and the
 # a679c7e7 pin (PR #43 merged):
 # QVAC-19557 chatterbox iOS-memory work — streamed GGUF tensor loads (no
@@ -56,14 +46,11 @@
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
 
-# INTERIM: fork pin for the unmerged LavaSR PR #68 (QVAC-16579). Flip REPO to
-# tetherto/qvac-ext-lib-whisper.cpp + REF to the merged master commit and
-# re-run `vcpkg x-add-version tts-cpp` before merging this registry change.
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
-    REPO Zbig9000/qvac-ext-lib-whisper.cpp
-    REF 167c94060ae33da2d148c85cc7190e86bdd0136a
-    SHA512 20cd663c761033cb7f992ae623f6d240415bedc4660685c5d114c3711f9efa9d496efe03576abe3d43cc0fef275d5f1df47081975ee97285402728395574c26d
+    REPO tetherto/qvac-ext-lib-whisper.cpp
+    REF 586268bfd8863b1b27e2e21305238d397921b747
+    SHA512 3922e709d034544e8e4c334c121a64f46ff4ee039997f6bb4cc9be4069cb4811e6eafe9b3ee991b1ba94b8b0d376c1d2990d48c7ab7ef7085650b64445f9e732
     HEAD_REF master
 )
 

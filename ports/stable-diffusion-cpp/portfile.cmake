@@ -13,16 +13,24 @@
 # ggml_backend_init_by_type() which works with both statically linked and
 # dynamically loaded backends.
 #
-# Pinned to 6a8ca71d -- the merge commit of
-# tetherto/qvac-ext-stable-diffusion.cpp#10, which bypasses spatial VAE tiling
-# for Wan 2.1 I2V video encode/decode on the 2026-03-01 branch (on top of #6's
-# generic ESRGAN upscaler backend init with device and preference APIs).
+# Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
+# 2026-06-04 (REF pinned to the merge commit for reproducibility).
+#
+# 11717d2 is the tip of 2026-06-04 — the merge of #13 (2026-06-04-ltx) into the
+# 2026-06-04 base. The base carries the general qvac patches (vcpkg port
+# patches, ESRGAN upscaler device API, Wan 2.1 I2V VAE tiling fix), while the
+# merged -ltx delta adds fused Flux RoPE, the ggml public leaf-API migration,
+# the CLI GPU-default tweak, and the MSVC /bigobj fix for C1128.
+#
+# The vendored ggml submodule is kept on the -ltx branch for standalone
+# (non-vcpkg) builds (SD_USE_SYSTEM_GGML defaults to OFF there), but this port
+# builds with -DSD_USE_SYSTEM_GGML=ON so ggml is provided by the vcpkg ggml port
+# (tetherto/qvac-ext-ggml@2026-06-06).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 6a8ca71dd247065b08dd57917d033622e1b0ae18
-    SHA512 a85a9af4e331d8ba40dc3ec886630a07c1bb8b6048fd9e9adcc709965d3d01f5e59f2d00c542967ff6cd5da2afac73cba7ce123df209aa18d6a6a6afe44093cf
-    HEAD_REF 2026-03-01
+    REF 11717d225f13eb21f0a7fe5c8c5c7d733b1203a7
+    SHA512 554e9f51fa63ab0a528f7c33cfd8823144fd8ea36f7a2d4e8388adb5bb554e08fa7d66d989f1a26eee7ebdf6276bf0c0a9eacf9f4fe13bba676350e78dc3a8fd
 )
 
 set(SD_FLASH_ATTN OFF)
