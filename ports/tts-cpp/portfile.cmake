@@ -2,6 +2,15 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# QVAC-16579 [TTS GGML] LavaSR neural speech enhancement
+# (qvac-ext-lib-whisper.cpp PR #68): opt-in CPU/GGML post-process that
+# bandwidth-extends synthesized PCM to 48 kHz via the LavaSR Vocos enhancer
+# (ConvNeXt backbone + ISTFT spec head), converted to a single GGUF. New public
+# API tts_cpp::lavasr::Enhancer (include/tts-cpp/lavasr/enhancer.h), DSP core
+# (resampler / STFT-ISTFT / Slaney mel / FastLR merge), GGUF loader (f32 + f16),
+# and onnxruntime-parity tests. Backward compatible: with no enhancer config the
+# output is byte-identical to the prior pin. The denoiser stage is a follow-up.
+#
 # QVAC-19557 [TTS GGML] S3TokenizerV2 host-mirror elimination
 # (qvac-ext-lib-whisper.cpp PR #65): the voice-conditioning bake loaded the
 # S3TokenizerV2 encoder weights (~458 MB F32) into a host std::vector mirror AND
@@ -12,10 +21,13 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 586268bf (PR #67
-# merged: QVAC-20557 run Chatterbox correctly on ARM Mali Vulkan via an
-# is_arm_mali-gated unfused CFM attention -- zero change off ARM Mali, CPU
-# output byte-identical).  Layered on the 46921668 pin (PR #65 merged,
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 4c8767a2 (PR #68
+# merged: QVAC-16579 LavaSR enhancer, described above -- exactly one commit
+# ahead of the prior 586268bf pin, so it carries the ARM Mali fix below).
+# Layered on the 586268bf pin (PR #67 merged: QVAC-20557 run Chatterbox
+# correctly on ARM Mali Vulkan via an is_arm_mali-gated unfused CFM attention
+# -- zero change off ARM Mali, CPU output byte-identical), the 46921668 pin
+# (PR #65 merged,
 # QVAC-19557 S3TokenizerV2 host-mirror elimination, described above), the
 # 1cc2d383 pin (QVAC-21118 PR #62: chunk-
 # streaming CFM-step floor for the Multilingual standard 10-step CFM) and the
@@ -49,8 +61,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 586268bfd8863b1b27e2e21305238d397921b747
-    SHA512 3922e709d034544e8e4c334c121a64f46ff4ee039997f6bb4cc9be4069cb4811e6eafe9b3ee991b1ba94b8b0d376c1d2990d48c7ab7ef7085650b64445f9e732
+    REF 4c8767a2cb98f91bb6dd8ce240cc5863231b1eb1
+    SHA512 760ab5282c4c27a445578cafb0e4647edabe1c218c00c332dea6207e402c6731a863774ab0dbc1e2846a482742632bf00d17b6b256090335a472fbf44bb54f3b
     HEAD_REF master
 )
 
