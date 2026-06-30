@@ -1,13 +1,13 @@
-# whisper-cpp: pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD
-# 1c75d6e9 (QVAC-19253 Supertonic + Chatterbox on Adreno-Vulkan, PR #41). We
-# move this port together with parakeet-cpp and tts-cpp so all three registry
+# whisper-cpp: pinned at tetherto/qvac-ext-lib-whisper.cpp@master
+# cb91a378 (QVAC-21582 — Pull latest from upstream whisper.cpp (v1.9.1) (#73)).
+# This port moves together with parakeet-cpp and tts-cpp so all three registry
 # ports source the same master commit and the same archive SHA512.
 #
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF 1c75d6e9d5f07a50d6b0e8b6cff48444df4594b3
-  SHA512 bd74d7831f3fdaad9bc5e366662e8c49a847db3ed7f66c4a8a94c10f1f7eee7c8fea58f91f1c8bc43da3ef64e1a4510aef6e376b5c7242711e256e14701f9e07
+  REF cb91a37862c52e7954539512e632819e9358585d
+  SHA512 a2ffbb061dbab4741ac05967eb9b348d200a9e2e2b44532f82534ef01566fe37b74d10735d380f8bf32a8e7c662a3c05be62ae662c018dce828d63f836461d6b
   HEAD_REF master
   PATCHES
     patches/0001-move-gnuinstalldirs-before-add-subdirectory-src.patch
