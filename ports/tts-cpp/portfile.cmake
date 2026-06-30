@@ -2,6 +2,16 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# QVAC-21483 [TTS GGML] output-frequency selection
+# (qvac-ext-lib-whisper.cpp PR #69): EngineOptions::output_sample_rate on both
+# the Chatterbox and Supertonic engines (plus the public tts_cpp resampler and
+# CLI flags). The vocoder still emits at the model's native rate; when a
+# positive rate is requested the engine resamples the final PCM once (batch) or
+# drives a single utterance-spanning OutputResampler (streaming) so the streamed
+# output is bit-identical to the batch resample -- no per-chunk seams or length
+# drift. 0 keeps the native rate (zero behaviour change). This is the engine API
+# the tts-ggml addon calls to honour the SDK output-rate option.
+#
 # QVAC-21335 [TTS GGML] MeCab support for Chatterbox MTL Japanese
 # (qvac-ext-lib-whisper.cpp PR #72): tts-cpp detects vcpkg's include/mecab
 # header layout, guards MSVC builds against Windows min/max macros, and links
@@ -27,9 +37,11 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 28f37eae (PR #72
-# merged: QVAC-21335 MeCab support for Chatterbox MTL Japanese, described
-# above).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD ce9ee96f (PR #69
+# merged: QVAC-21483 output-frequency selection, described above).
+# Layered on the 28f37eae pin (PR #72 merged: QVAC-21335 MeCab support for
+# Chatterbox MTL Japanese, described above -- exactly one commit behind, so it
+# carries the MeCab support).
 # Layered on the 4c8767a2 pin (PR #68 merged: QVAC-16579 LavaSR enhancer,
 # described above -- exactly one commit ahead of the prior 586268bf pin, so it
 # carries the ARM Mali fix below).
@@ -70,8 +82,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 28f37eae209efeb2859c013901d6ff341af97840
-    SHA512 b771171d0efdc3690fd0fd4d5c2724cb8cd00483f9a867648b2d973f2edd935f26dfe1ddec23f0bc73ce02b026dc7c5195337cb0bfb508add30fdd568c3d8684
+    REF ce9ee96f42bf8c4df9bb627afe520a50b22eafd9
+    SHA512 e3c9d3b427b9a9045ebc6333c83e8806d2b83b0b14bfd09f2c21a8096ae47988f4ee41e3fc9ac9a667c364d1a7368128fc6e2981cbd26d8ee073ae1dcbd6308f
     HEAD_REF master
 )
 
