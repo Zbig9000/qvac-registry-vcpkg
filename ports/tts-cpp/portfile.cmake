@@ -2,6 +2,18 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# QVAC-16579 [TTS GGML] LavaSR denoiser stage (scaffold)
+# (qvac-ext-lib-whisper.cpp PR #76): lands the file/API structure for the second
+# LavaSR stage -- the UL-UNAS GRU U-Net denoiser that cleans noisy input before
+# the Vocos enhancer bandwidth-extends it. New public API
+# tts_cpp::lavasr::Denoiser (include/tts-cpp/lavasr/denoiser.h) plus the
+# _core/_gguf/_api translation units and the ONNX->GGUF converter skeleton,
+# mirroring the shipped enhancer. Skeleton only: Denoiser::load() throws "not yet
+# implemented" until the forward math lands, so there is zero runtime behaviour
+# change -- with no denoiser config the output is byte-identical to the prior
+# pin. This publishes the symbols so the tts-ggml addon can wire the denoiser
+# slot ahead of the implementation.
+#
 # QVAC-21483 [TTS GGML] output-frequency selection
 # (qvac-ext-lib-whisper.cpp PR #69): EngineOptions::output_sample_rate on both
 # the Chatterbox and Supertonic engines (plus the public tts_cpp resampler and
@@ -37,8 +49,13 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD ce9ee96f (PR #69
-# merged: QVAC-21483 output-frequency selection, described above).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 032cee10 (PR #76
+# merged: QVAC-16579 LavaSR denoiser scaffold, described above).
+# Layered on the ce9ee96f pin (PR #69 merged: QVAC-21483 output-frequency
+# selection, described above -- three commits back; in between master also took
+# the whisper.cpp v1.9.1 upstream sync (PR #73, QVAC-21582) and a parakeet-cpp
+# ggml_backend_sched compute-routing change (PR #74, QVAC-18192), neither of
+# which touches the tts-cpp public API or CMake target).
 # Layered on the 28f37eae pin (PR #72 merged: QVAC-21335 MeCab support for
 # Chatterbox MTL Japanese, described above -- exactly one commit behind, so it
 # carries the MeCab support).
@@ -82,8 +99,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF ce9ee96f42bf8c4df9bb627afe520a50b22eafd9
-    SHA512 e3c9d3b427b9a9045ebc6333c83e8806d2b83b0b14bfd09f2c21a8096ae47988f4ee41e3fc9ac9a667c364d1a7368128fc6e2981cbd26d8ee073ae1dcbd6308f
+    REF 032cee10c8b249df1c317d35c2159df9f1797f3d
+    SHA512 245b0da5649888058694e692f3a8338970e3814e94281c648b5941d8c29f1eea665ac54b417118b4f79d0d691867a1c7473f8f91f1e04a499ff2d6908bda9a47
     HEAD_REF master
 )
 
