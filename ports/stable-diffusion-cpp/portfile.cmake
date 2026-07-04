@@ -16,7 +16,11 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
-# fe394ca is the tip of 2026-07-03 — 2026-06-04-ltx (the merge of #13 into the
+# 5832f9a is the tip of 2026-07-03 after merging the size-reduction change
+# that stops embedding unused Gemma2/GPT-OSS tokenizer vocab assets in static
+# QVAC diffusion-cpp prebuilds.
+#
+# fe394ca was the tip of 2026-07-03 — 2026-06-04-ltx (the merge of #13 into the
 # 2026-06-04 base) plus one commit. The base carries the general qvac patches
 # (vcpkg port patches, ESRGAN upscaler device API, Wan 2.1 I2V VAE tiling fix),
 # while the merged -ltx delta adds fused Flux RoPE, the ggml public leaf-API
@@ -32,8 +36,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF fe394ca42b37ae2dd861d0ed56857bd01675b125
-    SHA512 7f978409e61199027e0b6a1d72fc19770a1285906e3c29a822338cf5f898c6756df2b517c5a89aba20bf7a30241f0fa7fc98eca23299cc94e2d1b204b0323a74
+    REF 5832f9ac192d12c115aa7cf0b3838d6148a61828
+    SHA512 f2ec4302a2a38a5de1131535136c49fb5bfb3116d0db95f2cbef24d537b5e0d03857a5362ab9bb30a338537a3378e895b80c2370a925b9165581a3b4c361eed3
 )
 
 set(SD_FLASH_ATTN OFF)
