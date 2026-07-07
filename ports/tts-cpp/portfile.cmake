@@ -2,6 +2,19 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# [TTS GGML] LavaSR enhancer on a ggml compute graph (GPU + faster CPU)
+# (qvac-ext-lib-whisper.cpp PR #82): runs the LavaSR Vocos enhancer's ConvNeXt
+# backbone + ISTFT spec head through a ggml compute graph instead of the scalar
+# C++ core -- on a GPU backend (Vulkan on Windows/Linux, Metal on Apple, CUDA,
+# OpenCL) when EnhancerOptions::use_gpu is set, otherwise on the ggml-CPU backend
+# (still markedly faster than, and validated bit-comparable to, the scalar core,
+# which is kept as the correctness oracle + last-resort fallback). New
+# Enhancer::backend_name()/backend_device() report the resolved backend; the
+# companion denoiser stays on CPU (its recurrent GRU topology does not map onto an
+# efficient ggml graph). Backward compatible: default options keep the enhancer on
+# the CPU backend, and with no enhancer config the output is byte-identical to the
+# prior pin.
+#
 # [TTS GGML] T3 per-op GPU->CPU fallback via shared sched_dispatch
 # (qvac-ext-lib-whisper.cpp PR #81): closes the last GPU-unsupported-op
 # abort gap in T3 (Chatterbox Turbo/MTL); folds S3Gen/Supertonic onto the
@@ -79,10 +92,10 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 6c64f18f (PR #78
-# merged: LavaSR denoiser forward, described above -- exactly one
-# commit ahead of the 9ea1a5e0 pin (PR #77, Chatterbox MTL Chinese
-# (zh) support), which it carries).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 1cbea2b7 (PR #82
+# merged: LavaSR enhancer on a ggml compute graph, described above -- the current
+# master tip, one commit ahead of the d16d7853 pin (PR #81, T3 per-op GPU->CPU
+# fallback), which it carries).
 # Layered on the 9ea1a5e0 pin (PR #77 merged: Chatterbox MTL Chinese
 # (zh) support, described above -- exactly one commit ahead of the d149258 pin
 # (PR #71, chatterbox-mtl Metal q8 KV-on-GPU real fix), which it
@@ -137,8 +150,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF d16d785330d1e352e755099b9585f48f0bd34e89
-    SHA512 2e65a221bc3df9d97225e155321e9add13206cbafc265681de4e051a0c20071c37b329f2a18f810974ab5cc25f9d1fde89f79f8e5086f71101e6aa7d36e8f5e6
+    REF 1cbea2b7202d9a4be47f39dc46d61384f66804d2
+    SHA512 0e2767b4f9cef3ac9c7cef0be4d154af504e015379cb58b16be5bb5b1fa0064022193f50e3e05785727b8b80cac18706a70f1c6b609db849ee27e014c87041f4
     HEAD_REF master
 )
 
