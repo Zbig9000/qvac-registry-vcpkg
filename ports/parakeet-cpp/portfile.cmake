@@ -2,29 +2,32 @@
 # Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master ecac5bb7 (PR #85), layered on top of the 2e2f4d5 pin
-# (PR #87: CPU repack of quantized encoder GEMM weights, q4_0/q8_0 ->
-# interleaved 4x8/8x8 layouts, closing the CPU-side q4_0 speed penalty) and
-# the previous df54e37 pin (TDT multi-layer LSTM state, PR #83). Runs the EOU
-# RNN-T decoder as ggml graphs on GPU backends (Metal / CUDA / Vulkan):
-# span-batched joint scoring 16 frames per launch, persistent LSTM/pred state
-# and full-window enc-projection on device, on-device argmax, on-device <EOU>
-# state reset. Scalar host decode stays for CPU and ggml-opencl. RTX 4000
-# Vulkan RTF for EOU drops 0.0052 -> 0.0031 (decoder ~54 -> ~14.5 ms per 20 s
-# file). Requires ggml-speech >= 2026-07-13 (qvac-ext-ggml PR #40): Vulkan
-# row-wise shader OOB-write guards, without which the EOU encoder garbles the
-# first utterance of any file longer than 512 encoder frames (~41 s) on
-# Vulkan.
+# QVAC-22367: bound offline-transcription memory on long audio. transcribe_samples
+# / transcribe_samples_stream previously ran the conformer encoder over the whole
+# input in a single graph (O(T_enc^2) self-attention), OOMing on multi-hour files
+# (~100 GB for a 90 min file, SIGKILL). This pin slides the encoder over the audio
+# in overlapping windows and trims the shared context at the interior seams;
+# inputs that fit one window keep the bit-identical single-pass path. Layered on
+# top of master ecac5bb7 (PR #85, EOU RNN-T decoder as ggml graphs on GPU).
+# Requires ggml-speech >= 2026-07-15 (unchanged from the previous pin).
+#
+# WIP: REPO/REF/HEAD_REF point at the Zbig9000 fork branch pending the upstream
+# PR merge (SHA512 is the hash of that fork tarball). NOTE: master has since
+# moved parakeet-cpp/ to engines/parakeet/ (reorg PR #95); this pin deliberately
+# stays on the pre-reorg ecac5bb7 line so the bugfix does not also adopt the
+# layout migration. On upstream merge, repoint REPO -> tetherto, REF -> the merge
+# commit, HEAD_REF -> master, update SOURCE_PATH to engines/parakeet if the fix
+# lands on the reorged tree, and recompute SHA512.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
 
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
-    REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF ecac5bb729dd6e1c4e09da01353085d1c9c0ec37
-    SHA512 c08933c72c986780f91537854320638f3341fb348a99853fc6c9ec23bc359fe05c79bce4df8032ea1c102c4aa347adbb84c27c994f95c7964fc5c69895fdb136
-    HEAD_REF master
+    REPO Zbig9000/qvac-ext-lib-whisper.cpp
+    REF 963b28db7601c827df1cc8ad17e903a802864c3e
+    SHA512 34b157a031c42af95ef50eb05707ed90d5806f97a2f349c23e952bfce6e1a0586df236fb55b9c1194ee8204083bb6cd5d5b71dfc62a727b43ba5f456bad098d4
+    HEAD_REF QVAC-22367-parakeet-long-audio
 )
 
 set(SOURCE_PATH "${WHISPER_CPP_SRC}/parakeet-cpp")
