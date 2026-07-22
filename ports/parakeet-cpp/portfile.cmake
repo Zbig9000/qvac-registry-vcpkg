@@ -1,5 +1,5 @@
 # parakeet-cpp: NVIDIA Parakeet ASR + Sortformer diarization in pure C++/ggml.
-# Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
+# Sourced from the engines/parakeet/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
 # Long-audio memory fix: bound offline-transcription memory. transcribe_samples
@@ -8,17 +8,13 @@
 # (~100 GB for a 90 min file, SIGKILL). This pin computes the mel once (global
 # CMVN) and slides the encoder over it in overlapping windows, trimming the
 # shared context at the interior seams; inputs that fit one window keep the
-# bit-identical single-pass path. Layered on top of master ecac5bb7 (PR #85, EOU
-# RNN-T decoder as ggml graphs on GPU). Requires ggml-speech >= 2026-07-15
-# (unchanged from the previous pin).
+# bit-identical single-pass path. Requires ggml-speech >= 2026-07-15 (unchanged
+# from the previous pin).
 #
-# WIP: REPO/REF/HEAD_REF point at the Zbig9000 fork branch pending the upstream
-# PR merge (SHA512 is the hash of that fork tarball). NOTE: master has since
-# moved parakeet-cpp/ to engines/parakeet/ (reorg PR #95); this pin deliberately
-# stays on the pre-reorg ecac5bb7 line so the bugfix does not also adopt the
-# layout migration. On upstream merge, repoint REPO -> tetherto, REF -> the merge
-# commit, HEAD_REF -> master, update SOURCE_PATH to engines/parakeet if the fix
-# lands on the reorged tree, and recompute SHA512.
+# WIP: REPO/REF/HEAD_REF point at the Zbig9000 fork branch (rebased onto the
+# engines/parakeet layout) pending the upstream PR merge; SHA512 is the hash of
+# that fork tarball. On upstream merge, repoint REPO -> tetherto, REF -> the
+# merge commit, HEAD_REF -> master, and recompute SHA512.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -26,15 +22,15 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO Zbig9000/qvac-ext-lib-whisper.cpp
-    REF e5f22556bffb791be0c230281edb8e1a06564ee4
-    SHA512 894078f9e6f96e95193d28552100b29b03e077358bb1aa8a8f4d694dcd78fe85ca863c680cd36560a4cab6d2d9f1eb1d49161be4f320a3bbcd7c5f4baac2e8d1
+    REF e58ff4b005599f2af3efbe243b8cd8a96f3f2982
+    SHA512 53ba97681258cd912f24866e54df85c5ddd66f4d808d83d32ab6a6eeb7e5527a440d70e0fb9f7b99a52378fd3930a45a7fc34f9850d0db9d1bc7c8f3f38a8ed1
     HEAD_REF QVAC-22367-parakeet-long-audio
 )
 
-set(SOURCE_PATH "${WHISPER_CPP_SRC}/parakeet-cpp")
+set(SOURCE_PATH "${WHISPER_CPP_SRC}/engines/parakeet")
 if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
     message(FATAL_ERROR
-        "parakeet-cpp: ${SOURCE_PATH}/CMakeLists.txt missing; the parakeet-cpp/ "
+        "parakeet-cpp: ${SOURCE_PATH}/CMakeLists.txt missing; the engines/parakeet/ "
         "subfolder layout in qvac-ext-lib-whisper.cpp may have changed.")
 endif()
 
