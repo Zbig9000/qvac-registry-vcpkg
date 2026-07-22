@@ -11,20 +11,18 @@
 # bit-identical single-pass path. Requires ggml-speech >= 2026-07-15 (unchanged
 # from the previous pin).
 #
-# WIP: REPO/REF/HEAD_REF point at the Zbig9000 fork branch (rebased onto the
-# engines/parakeet layout) pending the upstream PR merge; SHA512 is the hash of
-# that fork tarball. On upstream merge, repoint REPO -> tetherto, REF -> the
-# merge commit, HEAD_REF -> master, and recompute SHA512.
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp master 88b690c0 (PR #101), the
+# merged long-form windowed-encoder change on the engines/parakeet layout.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
 
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
-    REPO Zbig9000/qvac-ext-lib-whisper.cpp
-    REF e58ff4b005599f2af3efbe243b8cd8a96f3f2982
-    SHA512 53ba97681258cd912f24866e54df85c5ddd66f4d808d83d32ab6a6eeb7e5527a440d70e0fb9f7b99a52378fd3930a45a7fc34f9850d0db9d1bc7c8f3f38a8ed1
-    HEAD_REF QVAC-22367-parakeet-long-audio
+    REPO tetherto/qvac-ext-lib-whisper.cpp
+    REF 88b690c051666a63d6f5494a68596c4e785468ef
+    SHA512 a1adf1fc953e4c8210e120fc2859aece34a0c738407a346dadaa4bc1762b3f6f6f65ddaceb5ee6d470f56e209ae1d6f49a671cc844f3dfdd8c8a46bf53b426f0
+    HEAD_REF master
 )
 
 set(SOURCE_PATH "${WHISPER_CPP_SRC}/engines/parakeet")
