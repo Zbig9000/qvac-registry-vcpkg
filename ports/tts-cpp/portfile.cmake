@@ -161,12 +161,12 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 05879fc88bfb74cfd15c386d5dd09aeac852d62a
-    SHA512 46fcd030e8cb1e9c62f933cd20424caa389dcd270751d562451b054a304787f9f524520c1e5efbba4ada2827af4b110652cdc60dfcb15bc97cb8ac47c80548d0
+    REF 88b690c051666a63d6f5494a68596c4e785468ef
+    SHA512 a1adf1fc953e4c8210e120fc2859aece34a0c738407a346dadaa4bc1762b3f6f6f65ddaceb5ee6d470f56e209ae1d6f49a671cc844f3dfdd8c8a46bf53b426f0
     HEAD_REF master
 )
 
-set(SOURCE_PATH "${WHISPER_CPP_SRC}/tts-cpp")
+set(SOURCE_PATH "${WHISPER_CPP_SRC}/engines/tts")
 if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
     message(FATAL_ERROR
         "tts-cpp: ${SOURCE_PATH}/CMakeLists.txt missing; the tts-cpp/ "
