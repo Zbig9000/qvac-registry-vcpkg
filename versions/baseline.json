@@ -1,8 +1,8 @@
 {
   "default": {
     "abseil": {
-      "baseline": "onnxruntime",
-      "port-version": 1
+      "baseline": "20260526.0",
+      "port-version": 0
     },
     "audiogen-cpp": {
       "baseline": "2026-07-29",
