@@ -2,8 +2,14 @@
 # C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# [TTS GGML] Parler-TTS Vulkan on ARM Mali
+# (qvac-ext-lib-whisper.cpp PR #119):
+# lets the validated Parler pipeline select Vulkan on Mali instead of silently
+# falling back to CPU when GPU execution is requested. Verified end-to-end on
+# a Pixel 9a (Mali-G715). Engine-side only; no new ggml-speech requirement.
+#
 # [TTS GGML] CosyVoice3 on the GPU (OpenCL / Adreno)
-# (qvac-ext-lib-whisper.cpp PR #118, QVAC-22777): CosyVoice3 landed CPU-only --
+# (qvac-ext-lib-whisper.cpp PR #118): CosyVoice3 landed CPU-only --
 # cosyvoice_load_gguf() hardcoded a CPU backend, all six graphs computed through
 # it directly, and n_gpu_layers / backends_dir were declared but never read.
 # This adds the GPU path and removes what blocked it: mish() built log(exp(x)+1)
@@ -20,7 +26,7 @@
 # CPU output is byte-identical.
 #
 # [TTS GGML] CosyVoice3 dl-safe backend init
-# (qvac-ext-lib-whisper.cpp PR #117, QVAC-22652): the CosyVoice3 engine
+# (qvac-ext-lib-whisper.cpp PR #117): the CosyVoice3 engine
 # (cosyvoice_pipeline.cpp) called ggml_backend_cpu_init() and ggml_new_f32()
 # directly, which are unresolvable under GGML_BACKEND_DL=ON (per-arch CPU dlopen
 # variants on aarch64 Linux / Android) -- the @qvac/tts-ggml addon prebuild
@@ -30,7 +36,7 @@
 # statically-linked arches were unaffected.
 #
 # [TTS GGML] Parler-TTS: bounded DAC decode memory + always-sampling
-# (qvac-ext-lib-whisper.cpp PR #114, QVAC-21599): fixes the iOS e2e failure
+# (qvac-ext-lib-whisper.cpp PR #114): fixes the iOS e2e failure
 # `parler: DAC decode failed`, which had two compounding causes.
 #   1. The DAC compute arena was unbounded in output length
 #      (~13.6 + 1.957 * n_frames MiB). iOS backs Metal buffers with
@@ -52,7 +58,7 @@
 # No new ggml-speech requirement: this is engine-side only.
 #
 # [TTS GGML] Parler-TTS on Vulkan
-# (qvac-ext-lib-whisper.cpp PR #110, QVAC-21596): runs the full Parler pipeline
+# (qvac-ext-lib-whisper.cpp PR #110): runs the full Parler pipeline
 # -- T5 encoder, delay-pattern decoder LM, DAC vocoder -- on Vulkan for the
 # mini / large / Indic families. The GPU gate becomes a validated-backend
 # allowlist (Metal + Vulkan) instead of a Metal-only check, and T5 / DAC now
@@ -62,7 +68,7 @@
 # not a courtesy bump. Unvalidated backends still fall back to CPU.
 #
 # [TTS GGML] Parler-TTS Metal GPU support
-# (qvac-ext-lib-whisper.cpp PR #103, QVAC-21593): adds Metal GPU offload to the
+# (qvac-ext-lib-whisper.cpp PR #103): adds Metal GPU offload to the
 # Parler engine (EngineOptions::n_gpu_layers) -- flash-attention plus fused
 # QKV / LM-head matmuls on the decode hot path and a conv_transpose_1d matmul
 # reformulation for the DAC -- ~2.25x faster than CPU on indic-parler q8_0
@@ -71,7 +77,7 @@
 # Parler. Metal is the validated GPU backend; other backends fall back to CPU.
 #
 # [TTS GGML] CosyVoice3 native C++/ggml TTS engine
-# (qvac-ext-lib-whisper.cpp PR #99, QVAC-21928): adds the Fun-CosyVoice3-0.5B
+# (qvac-ext-lib-whisper.cpp PR #99): adds the Fun-CosyVoice3-0.5B
 # engine (public API tts-cpp/cosyvoice/engine.h) -- Qwen2.5 LM (text -> speech
 # tokens) + DiT conditional-flow-matching (tokens -> mel) + CausalHiFT vocoder
 # (mel -> 24 kHz PCM), all on the ggml-speech backend, CPU. Validated
@@ -85,7 +91,7 @@
 # @qvac/tts-ggml addon wires for CosyVoice3.
 #
 # [TTS GGML] Chatterbox S3Gen configurable CFG rate
-# (qvac-ext-lib-whisper.cpp PR #88, QVAC-21908): exposes the S3Gen
+# (qvac-ext-lib-whisper.cpp PR #88): exposes the S3Gen
 # classifier-free-guidance rate as a caller option (EngineOptions::s3gen_cfg_rate
 # and s3gen_synthesize_opts::cfg_rate; sentinel -1 keeps the model's GGUF-baked
 # rate, 0 disables CFG -- skipping the cond+uncond batch-2 pass and roughly
@@ -184,13 +190,11 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD d09cdb9e -- the
-# current master tip. The only engines/tts change since the 928369c9 pin
-# (PR #110, Parler-TTS on Vulkan, described above) is PR #114 (bounded DAC
-# decode memory + always-sampling, described above); the intervening commits
-# touch engines/audiogen and .github only. whisper-cpp and parakeet-cpp stay
-# at 928369c9 and audiogen-cpp at 26803b09 because their subtrees are
-# byte-identical at those commits. Carries the fc844ce5 pin
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD d6b00d95 (PR #119).
+# Relative to the previous tts-cpp pin 1823ab31, this only changes Parler's
+# Android Mali backend selection plus its shared policy documentation.
+# whisper-cpp, parakeet-cpp, and audiogen-cpp remain on their existing pins
+# because their subtrees are byte-identical. Carries the fc844ce5 pin
 # (PR #99, CosyVoice3, described above) and the 05879fc pin (PR #88 merged: Chatterbox S3Gen
 # configurable CFG rate, described above) and the 1cbea2b7 pin (PR #82 merged:
 # LavaSR enhancer on a ggml compute graph, described below), one commit ahead of
@@ -249,8 +253,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 1823ab31ec2c3f42b2056316d6720382300fd0ee
-    SHA512 aa155c6b6b662150db3f6647dcd25eb4dfe78c3732f121333294c7cbb15a5e8ff3104b733e22af184cf1b713e922875659264aa095f5e6dfa5d7a9fd7f3a5f0f
+    REF d6b00d952a87e5d4333f2522ad81ebebb5696b9b
+    SHA512 40dadd8b39920bba8d91bcb4d1e6380f333a49d9214ef3a9ba53b3bd75ed7cafef97444af466c9ff52c117131ec1dfbe746451e0cda4096a732e4b21440573ee
     HEAD_REF master
 )
 
