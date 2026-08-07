@@ -2,36 +2,11 @@
 # in pure C++/ggml, from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# [TTS GGML] Audio8 TTS on CPU
-# (qvac-ext-lib-whisper.cpp PR #128): a DualAR zero-shot model -- a
-# Qwen2.5-shaped 24-layer AR emits one semantic token per 21.5 Hz frame, a
-# 4-layer fast AR expands each into the frame's remaining nine codebooks, and a
-# DAC-style codec synthesises 44.1 kHz audio. Text to speech and voice cloning
-# both run in this process: the codec's analysis half is ported too, so a caller
-# hands the engine a reference wav rather than codes computed elsewhere. It
-# ships as three GGUFs -- language model, codec decoder, codec encoder -- whose
-# lifetimes differ, so a text-only deployment can omit the encoder.
-#   The codec runs in blocks in both directions. Its convolution stacks work at
-#   the sample rate, so their activations, not the language model, are what made
-#   memory grow with utterance length: a 24 s decode needed a 1.5 GB arena and
-#   now needs ~150 MB, encode ~443 MB and now ~72 MB. Each block is re-fed the
-#   receptive field its stack needs and drops what that context produced, so the
-#   result is identical to a single pass whatever the block size, and a cancel
-#   is honoured at the next language model step or codec block.
-#   Six CTest targets check the stages against fixtures dumped from the
-#   checkpoint's own generate loop: tokenizer ids and the ChatML prompt, the
-#   language model's per-step trajectory, the codec at every stage boundary in
-#   both directions, the filtered score vectors, the repetition-aware window,
-#   and both public paths end to end.
-#   CPU-only in this release. New engine only: nothing existing changes shape,
-#   and the ggml-speech floor stays at 2026-08-07.
-#
-# Pinned at master 09566de3 (PR #128). Relative to the previous tts-cpp pin
-# 5e57a692 the tts subtree adds the Audio8 engine and nothing else, so
-# whisper-cpp, parakeet-cpp and audiogen-cpp stay where they are: the only other
-# commit in between touches two ACE-Step smoke executables (PR #127) and leaves
-# every port's library sources byte-identical. The four re-align on one source
-# archive at the next joint bump.
+# Pinned at master 09566de3, which adds the Audio8 engine (PR #128): a DualAR
+# zero-shot model with in-process voice cloning, CPU-only, three GGUFs. Nothing
+# existing changes shape and the ggml-speech floor stays at 2026-08-07.
+# whisper-cpp / parakeet-cpp / audiogen-cpp stay at 5e57a692, whose library
+# sources are byte-identical here; the four re-align at the next joint bump.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
