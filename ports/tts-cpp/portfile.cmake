@@ -1,12 +1,37 @@
-# tts-cpp: Resemble Chatterbox + Supertonic + CosyVoice3 + Parler-TTS in pure
-# C++/ggml, from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
+# tts-cpp: Resemble Chatterbox + Supertonic + CosyVoice3 + Parler-TTS + Audio8
+# in pure C++/ggml, from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master 5e57a692, shared with the whisper-cpp / parakeet-cpp /
-# audiogen-cpp ports so all four resolve one source archive against one
-# ggml-speech. engines/tts is unchanged from the previous pin; the ggml-speech
-# floor moves to 2026-08-07 for the Vulkan matmul src0 binding fix and the
-# OpenCL im2col rewrite (qvac-ext-ggml PRs #52, #53).
+# [TTS GGML] Audio8 TTS on CPU
+# (qvac-ext-lib-whisper.cpp PR #128): a DualAR zero-shot model -- a
+# Qwen2.5-shaped 24-layer AR emits one semantic token per 21.5 Hz frame, a
+# 4-layer fast AR expands each into the frame's remaining nine codebooks, and a
+# DAC-style codec synthesises 44.1 kHz audio. Text to speech and voice cloning
+# both run in this process: the codec's analysis half is ported too, so a caller
+# hands the engine a reference wav rather than codes computed elsewhere. It
+# ships as three GGUFs -- language model, codec decoder, codec encoder -- whose
+# lifetimes differ, so a text-only deployment can omit the encoder.
+#   The codec runs in blocks in both directions. Its convolution stacks work at
+#   the sample rate, so their activations, not the language model, are what made
+#   memory grow with utterance length: a 24 s decode needed a 1.5 GB arena and
+#   now needs ~150 MB, encode ~443 MB and now ~72 MB. Each block is re-fed the
+#   receptive field its stack needs and drops what that context produced, so the
+#   result is identical to a single pass whatever the block size, and a cancel
+#   is honoured at the next language model step or codec block.
+#   Six CTest targets check the stages against fixtures dumped from the
+#   checkpoint's own generate loop: tokenizer ids and the ChatML prompt, the
+#   language model's per-step trajectory, the codec at every stage boundary in
+#   both directions, the filtered score vectors, the repetition-aware window,
+#   and both public paths end to end.
+#   CPU-only in this release. New engine only: nothing existing changes shape,
+#   and the ggml-speech floor stays at 2026-08-07.
+#
+# Pinned at master 09566de3 (PR #128). Relative to the previous tts-cpp pin
+# 5e57a692 the tts subtree adds the Audio8 engine and nothing else, so
+# whisper-cpp, parakeet-cpp and audiogen-cpp stay where they are: the only other
+# commit in between touches two ACE-Step smoke executables (PR #127) and leaves
+# every port's library sources byte-identical. The four re-align on one source
+# archive at the next joint bump.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +39,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 5e57a69221e58a091aac07b2d19895df985ba53c
-    SHA512 2cce663c5c375e07d0bdc109fe40ce13727fa0f01969537fa1b2e07c8a20429e4854fc140e40d3b146f2debcb75207952c8a5efbf67d8c21dba4e60452cf53fd
+    REF 09566de32e48a2681d78ab442d51d083f4301fc7
+    SHA512 556a18d2e1ff2102b5ba702a23fb2d3793591a0c02a57ce5a58de8567840ac5fa7b713b3aa58630f3161b0436c0b8ccf7394585383416a6995635d41fe41d5ea
     HEAD_REF master
 )
 
