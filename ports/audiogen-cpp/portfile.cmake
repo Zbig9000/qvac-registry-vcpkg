@@ -2,11 +2,11 @@
 # engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp; consumes the
 # ggml-speech port.
 #
-# Pinned at merged commit 80d5c3a2 (qvac-ext-lib-whisper.cpp PR #132). This
-# aligns generation with official ACE-Step, including the Haar wavelet DCW
-# correction that removes robotic artifacts and the stabilized quantized
-# batched LM head. The ggml-speech floor remains 2026-08-07 because it already
-# provides the required GPU kernels for the supported backends.
+# Pinned at master 52b9abc, shared with the whisper-cpp / parakeet-cpp / tts-cpp
+# ports so all four resolve one source archive against one ggml-speech.
+# engines/audiogen is byte-identical to the previous 80d5c3a2 pin (PR #132, the
+# official ACE-Step generation alignment) and the ggml-speech floor stays at
+# 2026-08-07; this republish only re-joins the shared archive.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +14,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 80d5c3a267753422d57c533441b3fb640bb7d56a
-    SHA512 3e9b5f168e3b18acd7cbb17c291381e7fa16fee2bcbfce621749d121609a39d34305d563d2cdb522d0f9b07f8e08f4f77822e77bf6c60fcc0ff01bc7caaf71d3
+    REF 52b9abcc7a0ffb129e33cba80f7a657c757fb6ed
+    SHA512 77b43132f2b4c97356868b4c01476eb8bb2578c70541a6e151f3b098270b71e375b0b7fc09086977970dd71ab65193938147fc3a22388c80b690b5a19422e90b
     HEAD_REF master
 )
 
