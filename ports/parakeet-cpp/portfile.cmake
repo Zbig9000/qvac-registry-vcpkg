@@ -10,9 +10,9 @@
 #
 # Pinned at master e9255b29 (merged qvac-ext-lib-whisper.cpp#133) for
 # IndicConformer multilingual CTC language masking (EngineOptions::language /
-# CLI --language + converter lang_* metadata). Port-version 1 over the
-# 2026-08-10 shared-archive republish at 52b9abc (#293). ggml-speech floor
-# stays at 2026-08-07.
+# CLI --language + converter lang_* metadata). Port-version 2 corrects the
+# source archive checksum published by port-version 1. ggml-speech floor stays
+# at 2026-08-07.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -21,7 +21,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
     REF e9255b29815d6b73f0c0de95e98570e57de31831
-    SHA512 24126fd71a32f99cace0f134b4055af0718e3239d82b0ab2650dd6992b8ea1fcad8b4626511c7507550386ed87d4553b96a7f6f75df1d6ff2c581e2ecd8c07e9
+    SHA512 28d5b60cdcc664e9353183e1b015b36615ab6de78e5434d34a361a4df496e83e6f5697be3202fa736aa5d588318cf57dc84de2b47af3f5a85305bd633942ee2b
     HEAD_REF master
 )
 
