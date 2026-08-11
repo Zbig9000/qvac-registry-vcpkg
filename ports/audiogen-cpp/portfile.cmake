@@ -1,12 +1,6 @@
 # audiogen-cpp: ACE-Step music generation in pure C++/ggml, from the
 # engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp; consumes the
 # ggml-speech port.
-#
-# Pinned at master 52b9abc, shared with the whisper-cpp / parakeet-cpp / tts-cpp
-# ports so all four resolve one source archive against one ggml-speech.
-# engines/audiogen is byte-identical to the previous 80d5c3a2 pin (PR #132, the
-# official ACE-Step generation alignment) and the ggml-speech floor stays at
-# 2026-08-07; this republish only re-joins the shared archive.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +8,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 52b9abcc7a0ffb129e33cba80f7a657c757fb6ed
-    SHA512 77b43132f2b4c97356868b4c01476eb8bb2578c70541a6e151f3b098270b71e375b0b7fc09086977970dd71ab65193938147fc3a22388c80b690b5a19422e90b
+    REF 78925059d85fa3ae1caeb2073aaa6d4dce817c1b
+    SHA512 c11eceffb0d220afda63960a0e83429502898bc0085f7a0c2a42de74670780fc646a5a794b70920133d1aaec63fb1ea94b22b36665abcc573a7f6bcbdb3a692d
     HEAD_REF master
 )
 
