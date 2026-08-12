@@ -16,6 +16,10 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
+# 1dcbe360 is the merged 2026-07-03 tip after merging qvac-ext-stable-
+# diffusion.cpp PR #25, preserving the ABot-World session API while adding
+# the final transactional LoRA loading and safe VAE fallback fixes.
+#
 # 97594f3 is the tip of 2026-07-03 after merging PR #27 on top of PR #22:
 # the walk's masked self-attention composes its mask explicitly
 # (scale -> add -> soft_max, the KV-cache path's formulation) instead of the
@@ -72,8 +76,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 97594f36ee6946a446c8911c3154b4df2214a9a8
-    SHA512 4fab35be136daa4e6d22e6b6161bfb42fc3a5d9ef6a4b4ddac2a57e2f9c4fc946626342010a1a5a1f769f881c4789b7ce1d99a24fca4e33c5f1ea378d8c7488f
+    REF 1dcbe3604c195a18005e95d9b7fd467c316643cc
+    SHA512 e578efc65e398c7712ee674243f25b960e9bb04d96d3bee0860623a958d2016575e6df42983365b798014940bc50cdf08cdee09736cee2bd910ac4f52ab3caa8
 )
 
 set(SD_FLASH_ATTN OFF)
