@@ -10,7 +10,7 @@
 # ONE system ggml (find_package(ggml) from the ggml-speech port) and hands it
 # to every enabled engine, so the whole stack shares a single ggml pin — the
 # ggml/ tree vendored inside the whisper subtree is never compiled. Backend
-# selection (metal / vulkan / opencl) is therefore expressed purely as
+# selection (metal / vulkan / opencl / cuda) is therefore expressed purely as
 # ggml-speech features in vcpkg.json; the GGML_* flags passed below only steer
 # engine-side gating (e.g. which GPU paths the engines consider validated).
 #
@@ -31,8 +31,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF d5472eecf7659d063054654f4a56bc5ad4820ad4
-    SHA512 67eef354a152e1867161c47a93d48ab8903e6fb112a2855de276c07fd57e60976bb5919400aeedec8c40b8114c799a910ab32d8bd3812e59b2c3e9108356b626
+    REF fb946d3e6846bd2007bfabf660ed7df6b3360dc8
+    SHA512 a31726285e2b85dadec688d0bc6577fb6b1131d9280a9fbbc643e3b7ab5a1f858132a48322180afde2c511ee0c30265a43647b0d67ff80d0b47d7e9b4e95a55f
     HEAD_REF master
 )
 
@@ -74,6 +74,7 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         metal   GGML_METAL
         vulkan  GGML_VULKAN
         opencl  GGML_OPENCL
+        cuda    GGML_CUDA
         coreml  PARAKEET_COREML
 )
 
