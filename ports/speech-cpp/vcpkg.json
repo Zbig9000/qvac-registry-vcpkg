@@ -2,7 +2,7 @@
   "name": "speech-cpp",
   "version-date": "2026-08-24",
   "port-version": 1,
-  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines. This port revision advances the source pin to qvac-ext-lib-whisper.cpp fb946d3e and adds the cuda feature, which selects ggml-speech[cuda] and the engine-side CUDA gating: ACE-Step, Chatterbox, Supertonic and Parler-TTS all run on CUDA. Requires ggml-speech 2026-08-21.",
+  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
   "dependencies": [
