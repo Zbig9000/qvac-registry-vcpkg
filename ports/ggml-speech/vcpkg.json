@@ -1,7 +1,7 @@
 {
   "name": "ggml-speech",
   "version-date": "2026-10-20",
-  "description": "Speech-stack ggml flavour consumed by speech-cpp. 2026-10-20: WebGPU backend (webgpu feature on Google Dawn) made usable: loader probes the webgpu module, high-performance adapter, Dawn's Null adapter refused, unaligned tensor I/O and large dispatch grids fixed (qvac-ext-ggml#127).",
+  "description": "Speech-stack ggml flavour consumed by speech-cpp. 2026-10-20: WebGPU backend (webgpu feature on Google Dawn) made usable: loader probes the webgpu module, high-performance adapter, Dawn's Null adapter refused, unaligned tensor I/O and large dispatch grids fixed (qvac-ext-ggml#127, merge a6122941).",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
   "dependencies": [
