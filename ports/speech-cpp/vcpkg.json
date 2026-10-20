@@ -1,7 +1,6 @@
 {
   "name": "speech-cpp",
-  "version-date": "2026-10-19",
-  "port-version": 1,
+  "version-date": "2026-10-20",
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -9,7 +8,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-10-19"
+      "version>=": "2026-10-20"
     },
     {
       "name": "vcpkg-cmake",
@@ -105,6 +104,18 @@
             "vulkan"
           ],
           "platform": "!osx & !ios"
+        }
+      ]
+    },
+    "webgpu": {
+      "description": "Enable the WebGPU (Dawn) GPU acceleration for all enabled engines, via ggml-speech[webgpu]. Opt-in on every platform, selected at runtime with the engines' backend = \"webgpu\" option or a --backend webgpu CLI flag. See the ggml-speech feature for the official-registry ports (dawn and its dependencies) a consumer has to import.",
+      "dependencies": [
+        {
+          "name": "ggml-speech",
+          "default-features": false,
+          "features": [
+            "webgpu"
+          ]
         }
       ]
     },

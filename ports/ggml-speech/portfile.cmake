@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 1bb92ec5d99c069d9fb7d15abd642ae24f5371c0
-    SHA512 46b8ba2596b5f8a3468f603969fc798dbd03d607cd8b22505c6eec8f4eeffa2146cade27042498a0ac4024f8c41fc45b643c938f9aba01b4bd73c98813d4991c
+    REF 2d3b497be20d10f992d29d9e65ced0888e7162f3
+    SHA512 2a14e830190e1da8474f66b94122bc641eebe7cdaf9844ec92b15a6a0412f47c15af7972cac389a9dbdcf78b8f21405aed3e18ae63c343766896f70f6ba53f38
     HEAD_REF speech
 )
 
@@ -10,6 +10,7 @@ set(GGML_METAL  OFF)
 set(GGML_VULKAN OFF)
 set(GGML_CUDA   OFF)
 set(GGML_OPENCL OFF)
+set(GGML_WEBGPU OFF)
 set(GGML_METAL_FUSE_MV_BIAS OFF)
 
 if("metal" IN_LIST FEATURES)
@@ -89,6 +90,17 @@ endif()
 
 if("opencl" IN_LIST FEATURES)
     set(GGML_OPENCL ON)
+endif()
+
+# WebGPU rides on the dawn port from the official registry (Dawn built from
+# source under the same triplet, so a clang/libc++ triplet never links a
+# libstdc++-built Dawn). ggml-webgpu embeds its WGSL shaders with a Python
+# script at configure time, hence the explicit interpreter.
+set(GGML_WEBGPU_OPTIONS "")
+if("webgpu" IN_LIST FEATURES)
+    set(GGML_WEBGPU ON)
+    vcpkg_find_acquire_program(PYTHON3)
+    list(APPEND GGML_WEBGPU_OPTIONS "-DPython3_EXECUTABLE=${PYTHON3}")
 endif()
 
 if(VCPKG_TARGET_IS_ANDROID AND "vulkan" IN_LIST FEATURES)
@@ -228,6 +240,8 @@ vcpkg_cmake_configure(
         -DGGML_VULKAN=${GGML_VULKAN}
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
+        -DGGML_WEBGPU=${GGML_WEBGPU}
+        ${GGML_WEBGPU_OPTIONS}
         -DGGML_HEXAGON=OFF
         -DGGML_METAL_FUSE_MV_BIAS=${GGML_METAL_FUSE_MV_BIAS}
         -DGGML_LIB_OUTPUT_PREFIX=qvac-speech-
