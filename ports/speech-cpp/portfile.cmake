@@ -58,6 +58,11 @@ foreach(SPEECH_ENGINE IN LISTS SPEECH_ENGINE_FEATURES)
     endif()
 endforeach()
 
+set(SPEECH_MINIMAX_COREML OFF)
+if(VCPKG_TARGET_IS_OSX AND SPEECH_BUILD_AUDIOGEN)
+    set(SPEECH_MINIMAX_COREML ON)
+endif()
+
 # Unreachable through a default install (the whisper feature is a default);
 # guards a manifest that sets default-features false and picks only backends.
 if (NOT SPEECH_ENABLED_ENGINES)
@@ -149,6 +154,7 @@ vcpkg_cmake_configure(
         -DAUDIOGEN_BUILD_LIBRARY=ON
         -DAUDIOGEN_INSTALL=ON
         -DAUDIOGEN_CCACHE=OFF
+        -DAUDIOGEN_MINIMAX_COREML=${SPEECH_MINIMAX_COREML}
         # shared ggml-side knobs the engines forward
         -DGGML_NATIVE=OFF
         -DGGML_OPENMP=OFF
@@ -160,6 +166,7 @@ vcpkg_cmake_configure(
         PARAKEET_COREML
         TTS_CPP_COREML
         AUDIOGEN_COREML
+        AUDIOGEN_MINIMAX_COREML
 )
 
 vcpkg_cmake_install()
